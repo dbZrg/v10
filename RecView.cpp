@@ -45,6 +45,9 @@ void RecView::DoDataExchange(CDataExchange* pDX)
 	CRecordView::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(RecView)
 	//}}AFX_DATA_MAP
+	DDX_FieldText(pDX, IDC_EDIT1, m_pSet->m_id, m_pSet);
+	DDX_FieldText(pDX, IDC_EDIT2, m_pSet->m_name, m_pSet);
+	DDX_FieldText(pDX, IDC_CHECK1, m_pSet->m_manager, m_pSet);
 }
 
 BOOL RecView::PreCreateWindow(CREATESTRUCT& cs)
@@ -69,6 +72,34 @@ BOOL RecView::OnPreparePrinting(CPrintInfo* pInfo)
 	// default preparation
 	return DoPreparePrinting(pInfo);
 }
+
+void RecView::OnPrint(CDC* pDC, CPrintInfo* printInfo) {
+	int xRes = pDC->GetDeviceCaps(HORZRES);
+	int yRes = pDC->GetDeviceCaps(VERTRES);
+	CSize fontSize = pDC->GetTextExtent("A");
+	int rowSize = fontSize.cy;
+	int x = yRes / 10;
+	int y = rowSize * 5;
+
+	pDC->TextOut(x, y, "Id");
+	pDC->TextOut(x * 2, y, "Name");
+	pDC->TextOut(x * 4, y, "Manager");
+	pDC->MoveTo(x, y += rowSize);
+	pDC->LineTo(x * 8, y);
+
+	Set rs;
+	rs.Open();
+	while (!rs.IsEOF()) {
+		CString id;
+		id.Format("%d", rs.m_id);
+		pDC->TextOut(x, y += rowSize, id);
+		pDC->TextOut(x * 2, y, rs.m_name);
+		if (rs.m_manager) pDC->TextOut(x * 4, y, "X");
+		rs.MoveNext();
+
+	}
+}
+
 
 void RecView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
